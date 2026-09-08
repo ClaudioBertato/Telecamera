@@ -1,0 +1,33 @@
+{
+  "camera": {
+    "width": 1024,
+    "height": 600,
+    "offset_x": 0,
+    "offset_y": 0,
+    "exposure_us": 8000,
+    "gain": 16
+  },
+  "isp": {
+    "rgb.enabled": true,
+    "rgb.red_gain": 1.6,
+    "rgb.green_gain": 1.0,
+    "rgb.blue_gain": 1.35,
+    "rgb.red_offset": 0,
+    "rgb.green_offset": 0,
+    "rgb.blue_offset": 0,
+
+    "gamma.enabled": true,
+    "gamma.value": 1.8,
+
+    "histogram.enabled": false,
+    "histogram.dark_point": 0,
+    "histogram.light_point": 255,
+
+    "ccm.enabled": false,
+    "ccm.matrix": [
+      [1.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0],
+      [0.0, 0.0, 1.0]
+    ]
+  }
+}

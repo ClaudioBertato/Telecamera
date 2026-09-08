@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Acquisizione Sequenziale InnoMaker</title>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+        }
+        .controls { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+        }
+        input { 
+            background: #333; 
+            color: #fff; 
+            border: 1px solid #555; 
+            padding: 5px; 
+            margin-right: 15px; 
+            width: 80px; 
+        }
+        button { 
+            background: #007acc; 
+            color: #fff; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #005999; }
+        .gallery { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+        }
+        .card { 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            padding: 10px; 
+            border-radius: 5px; 
+            text-align: center; 
+        }
+        img { 
+            max-width: 220px; 
+            height: auto; 
+            display: block; 
+            margin-top: 8px; 
+            border-radius: 3px; 
+        }
+        #status-msg { 
+            color: #ffa500; 
+            font-weight: bold; 
+            margin-top: 10px; 
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Acquisizione Live in Streaming Sequenziale</h1>
+
+    <div class="controls">
+        <label>FPS: <input type="number" id="fps" value="1" step="0.1"></label>
+        <label>Durata (s): <input type="number" id="duration" value="5"></label>
+        <button onclick="startBurst()">Avvia Acquisizione</button>
+        <div id="status-msg"></div>
+    </div>
+
+    <h2>Galleria in tempo reale</h2>
+    <p>Totale frame salvati: <span id="total-count">0</span></p>
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+        function startBurst() {
+            let fps = document.getElementById('fps').value;
+            let duration = document.getElementById('duration').value;
+            
+            // Svuota subito la galleria e resetta i messaggi all'avvio
+            document.getElementById('gallery').innerHTML = '';
+            document.getElementById('total-count').innerText = '0';
+            document.getElementById('status-msg').innerText = 'Acquisizione in corso...';
+
+            let formData = new FormData();
+            formData.append('fps', fps);
+            formData.append('duration', duration);
+
+            fetch('/start_burst', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    pollStatus();
+                }
+            });
+        }
+
+        function pollStatus() {
+            fetch('/get_status')
+            .then(res => res.json())
+            .then(data => {
+                let gallery = document.getElementById('gallery');
+                let countSpan = document.getElementById('total-count');
+                
+                countSpan.innerText = data.files.length;
+                
+                // Ricostruisce la galleria aggiungendo un timestamp (?t=...) per evitare la cache del browser
+                gallery.innerHTML = '';
+                data.files.forEach((file, index) => {
+                    let card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div>Frame #${index + 1}</div>
+                        <img src="/frames/${file}?t=${new Date().getTime()}" alt="${file}">
+                    `;
+                    gallery.appendChild(card);
+                });
+
+                if (data.active) {
+                    setTimeout(pollStatus, 400);
+                } else {
+                    document.getElementById('status-msg').innerText = 'Acquisizione completata!';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
