@@ -67,6 +67,7 @@
         <label>FPS: <input type="number" id="fps" value="1" step="0.1"></label>
         <label>Durata (s): <input type="number" id="duration" value="5"></label>
         <button onclick="startBurst()">Avvia Acquisizione</button>
+        <button id="stopBtn" onclick="stopAcquisition()" style="background-color: #ff4d4d; color: white;">Ferma Acquisizione</button>
         <div id="status-msg"></div>
     </div>
 
@@ -99,6 +100,20 @@
                 }
             });
         }
+
+        function stopAcquisition() {
+            fetch('/stop_burst', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+                console.log("Acquisizione interrotta con successo.");
+                alert("Acquisizione interrotta.");
+            }
+        })
+        .catch(error => console.error('Errore:', error));
+}
 
         function pollStatus() {
             fetch('/get_status')
